@@ -11,13 +11,45 @@ function App() {
   const [exchangeRate, setExchangeRate] = useState(1);
   const [currentExchangeRate, setCurrentExchangeRate] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  // const [editId, setEditId] = useState(null);
 
-  //Currency type ve Base currency'leri ayarlarken tek bir api'dan cekerek yapamadim. kullandigim api bunu desteklemiyordu.
+  //handleEdit fonksiyonuna item propu verildi. Bu item transaction mapinden gelen itemla ui tarafinda kullanilirken eslesecek. Transaction'daki degerler propumuzun ozellikleriyle ayarlandi
+  // const handleEdit = item => {
+  //   setEditId(item.id);
+  //   setDescription(item.description);
+  //   setAmount(item.amount);
+  //   setCurrencyType(item.currencyType);
+  //   setShowModal(true);
+  // };
 
+  //handleIncome gelir ekleme fonksiyonudur. Kullanicinin edit butonuna basma ihtimalina karsn bir if else olusturdum.
+  //Eger editId varsa gecici yeni bir transaction degiskeni olusturdum transaction'i mapledim ve description, amount ve currencyType prop'larini guncelledim.
+  // Sonra setTransaction ile transaction state'ini guncelledim ve editId'yi null yaptim.
+  //Else islemini daha onceden transactionlari gostermek icin olusturmustum
   const handleIncome = e => {
     e.preventDefault();
+    // if (editId) {
+    //   const tempTransaction = transaction.map(item => {
+    //     if (item.id === editId) {
+    //       return {
+    //         ...item,
+    //         description: description,
+    //         amount: amount,
+    //         currencyType: currencyType,
+    //       };
+    //     }
+    //     return item;
+    //   });
+    //   setTransaction(tempTransaction);
+    //   setEditId(null);
+    // } else {
     setAmount("");
     setDescription("");
+    if (baseCurrency !== "usd") {
+      setFinalAmount(finalAmount + parseFloat(amount) / exchangeRate);
+    } else {
+      setFinalAmount(finalAmount + parseFloat(amount));
+    }
     if (currencyType !== "usd") {
       setFinalAmount(finalAmount + parseFloat(amount) / currentExchangeRate);
     } else {
@@ -37,6 +69,11 @@ function App() {
   const handleExpense = () => {
     setAmount("");
     setDescription("");
+    if (baseCurrency !== "usd") {
+      setFinalAmount(finalAmount - parseFloat(amount) / exchangeRate);
+    } else {
+      setFinalAmount(finalAmount - parseFloat(amount));
+    }
     if (currencyType !== "usd") {
       setFinalAmount(finalAmount - parseFloat(amount) / currentExchangeRate);
     } else {
@@ -62,27 +99,20 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=${baseCurrency}`
-    )
+    fetch(`https://api.exchangerate.host/latest?base=USD`)
       .then(res => res.json())
       .then(data => {
-        setExchangeRate(data.usd[baseCurrency]);
+        setExchangeRate(data.rates[baseCurrency.toUpperCase()]);
+        setCurrentExchangeRate(data.rates[currencyType.toUpperCase()]);
       });
-  }, [baseCurrency]);
+  }, [currencyType, baseCurrency]);
 
-  useEffect(() => {
-    fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=${currencyType}`
-    )
-      .then(res => res.json())
-      .then(data => {
-        setCurrentExchangeRate(data.usd[currencyType]);
-      });
-  }, [currencyType]);
+  //currency type
 
   console.log("currency type", currencyType);
   console.log("base currency", baseCurrency);
+  console.log("exchange rate", exchangeRate);
+  console.log("current exchange rate", currentExchangeRate);
 
   return (
     <div className="bg-slate-200 min-h-screen">
@@ -90,7 +120,7 @@ function App() {
       <div className="container mt-20 mx-auto ">
         <div className="p-5 bg-gradient-to-r from-indigo-500 rounded-lg shadow-xl">
           <h1 className="text-xl font-bold mb-4">
-            Total Amount: {finalAmount * exchangeRate}{" "}
+            Total Amount: {(finalAmount * exchangeRate).toFixed(2)}{" "}
             {baseCurrency.toUpperCase()}
           </h1>
           <h2 className="text-2xl font-bold mb-4">Transactions</h2>
@@ -127,7 +157,10 @@ function App() {
                   <td>{item.amount}</td>
                   <td>{item.currencyType}</td>
                   <td>
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
+                    <button
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
+                      // onClick={e => handleEdit(item)}
+                    >
                       Edit
                     </button>
                     <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
