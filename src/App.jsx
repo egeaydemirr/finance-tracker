@@ -90,13 +90,13 @@ function App() {
     ]);
   };
 
-  useEffect(() => {
-    fetch(`https://api.coingecko.com/api/v3/simple/supported_vs_currencies`)
-      .then(res => res.json())
-      .then(data => {
-        setCurrencies(data);
-      });
-  }, []);
+  // useEffect(() => {
+  //   fetch(`https://api.coingecko.com/api/v3/simple/supported_vs_currencies`)
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       setCurrencies(data);
+  //     });
+  // }, []);
 
   useEffect(() => {
     fetch(`https://api.exchangerate.host/latest?base=USD`)
@@ -104,6 +104,7 @@ function App() {
       .then(data => {
         setExchangeRate(data.rates[baseCurrency.toUpperCase()]);
         setCurrentExchangeRate(data.rates[currencyType.toUpperCase()]);
+        setCurrencies(Object.keys(data.rates));
       });
   }, [currencyType, baseCurrency]);
 
