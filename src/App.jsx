@@ -65,7 +65,7 @@ function App() {
           currencyType: currencyType,
           date: new Date().toLocaleDateString(),
           time: new Date().toLocaleTimeString(),
-          color: "bg-green-200"
+          color: "bg-green-200",
         },
       ]);
     }
@@ -93,7 +93,7 @@ function App() {
         currencyType: currencyType,
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
-        color: "bg-red-200"
+        color: "bg-red-200",
       },
     ]);
   };
@@ -115,15 +115,14 @@ function App() {
   console.log("amount", amount);
 
   return (
-    <div className="bg-slate-200 min-h-screen">
-      <h1 className="text-3xl  font-bold text-center pt-6">Finance Tracker</h1>
-      <div className="container mt-20 mx-auto ">
-        <div className="p-5 bg-gradient-to-r from-indigo-500 rounded-lg shadow-xl">
-          <h1 className="text-xl font-bold mb-4">
+    <div className="bg-gradient-to-r from-blue-300 to-indigo-500 min-h-screen">
+      <h1 className="text-3xl font-bold text-center py-6">Finance Tracker</h1>
+      <div className="container mx-auto mt-20">
+        <div className="p-5  rounded-lg">
+          <h2 className="text-lg font-semibold mb-4 ">
             Total Amount: {(finalAmount * exchangeRate).toFixed(1)}{" "}
             {baseCurrency.toUpperCase()}
-          </h1>
-          <h2 className="text-2xl font-bold mb-4">Transactions</h2>
+          </h2>
           <div className="mb-4">
             <label htmlFor="currency" className="mr-2">
               Change Base Currency
@@ -141,31 +140,52 @@ function App() {
               ))}
             </select>
           </div>
+          <h2 className="text-2xl font-bold mb-4">Transactions</h2>
+
           <table className="w-full table-fixed text-center">
             <thead>
-              <tr className="">
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Currency</th>
-                <th>Date</th>
-                <th>Action</th>
+              <tr className="bg-gray-200">
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  DESCRIPTION
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  AMOUNT
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  CURRENCY
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  DATE
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  ACTION
+                </th>
               </tr>
             </thead>
             <tbody>
               {transaction.map(item => (
                 <tr key={item.id} className={item.color}>
-                  <td>{item.description}</td>
-                  <td>{item.amount}</td>
-                  <td>{item.currencyType}</td>
-                  <td>{item.date}<br/>{item.time}</td>
-                  <td>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    {item.description}
+                  </td>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    {item.amount}
+                  </td>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    {item.currencyType.toUpperCase()}
+                  </td>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    <div className="text-sm text-gray-500">{item.date}</div>
+                    <div className="text-xs text-gray-500">{item.time}</div>
+                  </td>
+                  <td className="px-4 py-2 text-left">
                     <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
+                      className="w-20 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
                       onClick={e => handleEdit(item)}
                     >
                       Edit
                     </button>
-                    <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    <button className="w-20 bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1">
                       Delete
                     </button>
                   </td>
@@ -173,6 +193,7 @@ function App() {
               ))}
             </tbody>
           </table>
+
           <div className="flex justify-center pt-16">
             <button
               className="bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
