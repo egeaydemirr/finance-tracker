@@ -117,7 +117,7 @@ function App() {
 
   return (
     <div className="bg-gradient-to-r from-blue-300 to-indigo-500 min-h-screen">
-      <h1 className="text-3xl font-bold text-center py-6">Finance Tracker</h1>
+      <h1 className="text-3xl font-bold text-center pt-12">FINANCE TRACKER</h1>
       <div className="container mx-auto mt-20">
       <img src="public/logo.png" alt="Logo" className="w-32 absolute top-10 left-10" />
 
@@ -127,12 +127,12 @@ function App() {
             {baseCurrency.toUpperCase()}
           </h2>
           <div className="mb-4  flex flex-row">
-            <label htmlFor="currency" className="mr-2 rounded-md w ">
+            <label htmlFor="currency" className="m-2 rounded-md w ">
               Change Base Currency
             </label>
             <select
               id="currency"
-              className="w-1/2 p-2 border border-gray-400 rounded shadow"
+              className="w-70 text-gray-600 px-4 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:border-gray-700"
               onChange={e => setBaseCurrency(e.target.value)}
               value={baseCurrency}
             >
@@ -196,8 +196,6 @@ function App() {
     ))}
   </tbody>
 </table>
-
-
           <div className="flex justify-center pt-16">
             <button
               className="bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
