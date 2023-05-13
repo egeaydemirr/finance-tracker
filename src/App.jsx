@@ -63,6 +63,8 @@ function App() {
           description: description,
           amount: amount,
           currencyType: currencyType,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString(),
           color: "bg-green-200"
         },
       ]);
@@ -89,6 +91,8 @@ function App() {
         description: description,
         amount: amount,
         currencyType: currencyType,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
         color: "bg-red-200"
       },
     ]);
@@ -116,7 +120,7 @@ function App() {
       <div className="container mt-20 mx-auto ">
         <div className="p-5 bg-gradient-to-r from-indigo-500 rounded-lg shadow-xl">
           <h1 className="text-xl font-bold mb-4">
-            Total Amount: {(finalAmount * exchangeRate).toFixed(2)}{" "}
+            Total Amount: {(finalAmount * exchangeRate).toFixed(1)}{" "}
             {baseCurrency.toUpperCase()}
           </h1>
           <h2 className="text-2xl font-bold mb-4">Transactions</h2>
@@ -143,6 +147,7 @@ function App() {
                 <th>Description</th>
                 <th>Amount</th>
                 <th>Currency</th>
+                <th>Date</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -152,6 +157,7 @@ function App() {
                   <td>{item.description}</td>
                   <td>{item.amount}</td>
                   <td>{item.currencyType}</td>
+                  <td>{item.date}<br/>{item.time}</td>
                   <td>
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
