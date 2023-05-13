@@ -11,16 +11,17 @@ function App() {
   const [exchangeRate, setExchangeRate] = useState(1);
   const [currentExchangeRate, setCurrentExchangeRate] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  // const [editId, setEditId] = useState(null);
+  const [editId, setEditId] = useState(null);
+  
 
   //handleEdit fonksiyonuna item propu verildi. Bu item transaction mapinden gelen itemla ui tarafinda kullanilirken eslesecek. Transaction'daki degerler propumuzun ozellikleriyle ayarlandi
-  // const handleEdit = item => {
-  //   setEditId(item.id);
-  //   setDescription(item.description);
-  //   setAmount(item.amount);
-  //   setCurrencyType(item.currencyType);
-  //   setShowModal(true);
-  // };
+  const handleEdit = item => {
+    setEditId(item.id);
+    setDescription(item.description);
+    setAmount(item.amount);
+    setCurrencyType(item.currencyType);
+    setShowModal(true);
+  };
 
   //handleIncome gelir ekleme fonksiyonudur. Kullanicinin edit butonuna basma ihtimalina karsn bir if else olusturdum.
   //Eger editId varsa gecici yeni bir transaction degiskeni olusturdum transaction'i mapledim ve description, amount ve currencyType prop'larini guncelledim.
@@ -28,42 +29,44 @@ function App() {
   //Else islemini daha onceden transactionlari gostermek icin olusturmustum
   const handleIncome = e => {
     e.preventDefault();
-    // if (editId) {
-    //   const tempTransaction = transaction.map(item => {
-    //     if (item.id === editId) {
-    //       return {
-    //         ...item,
-    //         description: description,
-    //         amount: amount,
-    //         currencyType: currencyType,
-    //       };
-    //     }
-    //     return item;
-    //   });
-    //   setTransaction(tempTransaction);
-    //   setEditId(null);
-    // } else {
-    setAmount("");
-    setDescription("");
-    if (baseCurrency !== "usd") {
-      setFinalAmount(finalAmount + parseFloat(amount) / exchangeRate);
+    if (editId) {
+      const tempTransaction = transaction.map(item => {
+        if (item.id === editId) {
+          return {
+            ...item,
+            description: description,
+            amount: amount,
+            currencyType: currencyType,
+          };
+        }
+        return item;
+      });
+      setTransaction(tempTransaction);
+      setEditId(null);
     } else {
-      setFinalAmount(finalAmount + parseFloat(amount));
+      setAmount("");
+      setDescription("");
+      if (baseCurrency !== "usd") {
+        setFinalAmount(finalAmount + parseFloat(amount) / exchangeRate);
+      } else {
+        setFinalAmount(finalAmount + parseFloat(amount));
+      }
+      if (currencyType !== "usd") {
+        setFinalAmount(finalAmount + parseFloat(amount) / currentExchangeRate);
+      } else {
+        setFinalAmount(finalAmount + parseFloat(amount));
+      }
+      setTransaction([
+        ...transaction,
+        {
+          id: Date.now(),
+          description: description,
+          amount: amount,
+          currencyType: currencyType,
+          color: "bg-green-200"
+        },
+      ]);
     }
-    if (currencyType !== "usd") {
-      setFinalAmount(finalAmount + parseFloat(amount) / currentExchangeRate);
-    } else {
-      setFinalAmount(finalAmount + parseFloat(amount));
-    }
-    setTransaction([
-      ...transaction,
-      {
-        id: Date.now(),
-        description: description,
-        amount: amount,
-        currencyType: currencyType,
-      },
-    ]);
   };
 
   const handleExpense = () => {
@@ -86,34 +89,26 @@ function App() {
         description: description,
         amount: amount,
         currencyType: currencyType,
+        color: "bg-red-200"
       },
     ]);
   };
-
-  // useEffect(() => {
-  //   fetch(`https://api.coingecko.com/api/v3/simple/supported_vs_currencies`)
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       setCurrencies(data);
-  //     });
-  // }, []);
 
   useEffect(() => {
     fetch(`https://api.exchangerate.host/latest?base=USD`)
       .then(res => res.json())
       .then(data => {
+        setCurrencies(Object.keys(data.rates));
         setExchangeRate(data.rates[baseCurrency.toUpperCase()]);
         setCurrentExchangeRate(data.rates[currencyType.toUpperCase()]);
-        setCurrencies(Object.keys(data.rates));
       });
   }, [currencyType, baseCurrency]);
-
-  //currency type
 
   console.log("currency type", currencyType);
   console.log("base currency", baseCurrency);
   console.log("exchange rate", exchangeRate);
   console.log("current exchange rate", currentExchangeRate);
+  console.log("amount", amount);
 
   return (
     <div className="bg-slate-200 min-h-screen">
@@ -137,7 +132,7 @@ function App() {
             >
               {currencies.map(item => (
                 <option key={item} value={item}>
-                  {item}
+                  {item.toUpperCase()}
                 </option>
               ))}
             </select>
@@ -153,14 +148,14 @@ function App() {
             </thead>
             <tbody>
               {transaction.map(item => (
-                <tr key={item.id}>
+                <tr key={item.id} className={item.color}>
                   <td>{item.description}</td>
                   <td>{item.amount}</td>
                   <td>{item.currencyType}</td>
                   <td>
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
-                      // onClick={e => handleEdit(item)}
+                      onClick={e => handleEdit(item)}
                     >
                       Edit
                     </button>
