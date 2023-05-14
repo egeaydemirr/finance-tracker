@@ -10,28 +10,14 @@ function App() {
   const [currencies, setCurrencies] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [type, setType] = useState("Income");
-  
-  
-  
-
-  // const handleDelete = id => {
-  //   const newTransaction = transaction.filter(item => item.id !== id);
-  //   setTransaction(newTransaction);
-  // };
 
   const handleIncome = () => {
-    //inptlar bossa modal kapanmaz
     if (!description || !amount) {
       setShowModal(true);
       return;
     }
     setAmount("");
     setDescription("");
-    setType("Income");
-    console.log("amount", amount);
-
-
     setTransaction([
       ...transaction,
       {
@@ -41,7 +27,6 @@ function App() {
         currencyType: currencyType,
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
-        color: "bg-green-300",
         type: "Income",
       },
     ]);
@@ -55,8 +40,6 @@ function App() {
 
     setAmount("");
     setDescription("");
-    setType("Expense");
-
     setTransaction([
       ...transaction,
       {
@@ -66,27 +49,18 @@ function App() {
         currencyType: currencyType,
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
-        color: "bg-red-300",
         type: "Expense",
       },
     ]);
   };
-
-  // useEffect(() => {
-  //   fetch(`https://api.exchangerate.host/latest?base=USD`)
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       setCurrencies(Object.keys(data.rates));
-  //       setExchangeRate(data.rates[baseCurrency]);
-  //       setCurrentExchangeRate(data.rates[currencyType]);
-  //     });
-  // }, [currencyType, baseCurrency]);
 
   useEffect(() => {
     fetch(`https://api.exchangerate.host/latest?base=${baseCurrency}`)
       .then(res => res.json())
       .then(data => {
         setCurrencies(data.rates);
+        // console.log("rate", data.rates[baseCurrency]);
+        // console.log("ikicin rate:", currencies[baseCurrency]);
       });
   }, [baseCurrency]);
 
@@ -96,16 +70,38 @@ function App() {
         ? toplam + parseFloat(item.amount)
         : toplam - parseFloat(item.amount);
     }, 0);
-    setTotalAmount(total);
 
+    setTotalAmount(total);
   }, [transaction]);
 
-  console.log("Total Amount", totalAmount);
-  console.log("Currencies", currencies);
-  console.log("transaction", transaction);
+  useEffect(() => {
+    const currentExchangeRate = currencies[baseCurrency];
+    const newTransaction = transaction.map(item => {
+      return {
+        ...item,
+        amount: (item.amount * currentExchangeRate).toFixed(2),
+        currencyType: baseCurrency,
+      };
+    });
+    setTransaction(newTransaction);
+  }, [baseCurrency]);
+
+  useEffect(() => {
+    const exchangeRate = currencies[currencyType];
+    const newTransaction = transaction.map(item => {
+      return {
+        ...item,
+        amount: (item.amount / exchangeRate).toFixed(2),
+        currencyType: currencyType,
+      };
+    });
+    setTransaction(newTransaction);
+  }, [currencyType]);
+
   console.log("currency type", currencyType);
   console.log("base currency", baseCurrency);
-  
+  console.log("transaction", transaction);
+
   // console.log("current exchange rate", currentExchangeRate);
   console.log("amount", amount);
 
@@ -121,7 +117,11 @@ function App() {
 
         <div className="p-5  rounded-lg">
           <h2 className="text-lg font-semibold mb-4 ">
-            Total Amount: {totalAmount.toFixed(1) } {baseCurrency}
+            Total Amount:{" "}
+            {totalAmount.toLocaleString(undefined, {
+              style: "currency",
+              currency: baseCurrency,
+            })}
           </h2>
           <div className="mb-4  flex flex-row">
             <label htmlFor="currency" className="m-2 rounded-md w ">
@@ -186,7 +186,12 @@ function App() {
                     .includes(searchTerm.toLowerCase())
                 )
                 .map(item => (
-                  <tr key={item.id} className={item.color}>
+                  <tr
+                    key={item.id}
+                    className={
+                      item.type === "Income" ? "bg-green-300" : "bg-red-300"
+                    }
+                  >
                     <td className="px-4 py-2  text-gray-700 text-center">
                       {item.description}
                     </td>
