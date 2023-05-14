@@ -3,22 +3,24 @@ import { useEffect, useState } from "react";
 function App() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState();
-  const [finalAmount, setFinalAmount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [transaction, setTransaction] = useState([]);
   const [baseCurrency, setBaseCurrency] = useState("USD");
   const [currencyType, setCurrencyType] = useState("USD");
   const [currencies, setCurrencies] = useState([]);
-  const [exchangeRate, setExchangeRate] = useState(1);
-  const [currentExchangeRate, setCurrentExchangeRate] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [type, setType] = useState("Income");
+  
+  
+  
 
   // const handleDelete = id => {
-
+  //   const newTransaction = transaction.filter(item => item.id !== id);
+  //   setTransaction(newTransaction);
   // };
 
-  const handleIncome = e => {
-    e.preventDefault();
+  const handleIncome = () => {
     //inptlar bossa modal kapanmaz
     if (!description || !amount) {
       setShowModal(true);
@@ -26,21 +28,9 @@ function App() {
     }
     setAmount("");
     setDescription("");
-
-    if (baseCurrency !== "USD") {
-      setFinalAmount(finalAmount + parseFloat(amount) / exchangeRate);
-    } else {
-      setFinalAmount(finalAmount + parseFloat(amount));
-    }
-    if (currencyType !== "USD") {
-      setFinalAmount(finalAmount + parseFloat(amount) / currentExchangeRate);
-    } else {
-      setFinalAmount(finalAmount + parseFloat(amount));
-    }
-    console.log("final amount", finalAmount);
+    setType("Income");
     console.log("amount", amount);
-    console.log("exchange rate", exchangeRate);
-    console.log("current exchange rate", currentExchangeRate);
+
 
     setTransaction([
       ...transaction,
@@ -52,6 +42,7 @@ function App() {
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
         color: "bg-green-300",
+        type: "Income",
       },
     ]);
   };
@@ -64,16 +55,8 @@ function App() {
 
     setAmount("");
     setDescription("");
-    if (baseCurrency !== "usd") {
-      setFinalAmount(finalAmount - parseFloat(amount) / exchangeRate);
-    } else {
-      setFinalAmount(finalAmount - parseFloat(amount));
-    }
-    if (currencyType !== "usd") {
-      setFinalAmount(finalAmount - parseFloat(amount) / currentExchangeRate);
-    } else {
-      setFinalAmount(finalAmount - parseFloat(amount));
-    }
+    setType("Expense");
+
     setTransaction([
       ...transaction,
       {
@@ -84,24 +67,46 @@ function App() {
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
         color: "bg-red-300",
+        type: "Expense",
       },
     ]);
   };
 
+  // useEffect(() => {
+  //   fetch(`https://api.exchangerate.host/latest?base=USD`)
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       setCurrencies(Object.keys(data.rates));
+  //       setExchangeRate(data.rates[baseCurrency]);
+  //       setCurrentExchangeRate(data.rates[currencyType]);
+  //     });
+  // }, [currencyType, baseCurrency]);
+
   useEffect(() => {
-    fetch(`https://api.exchangerate.host/latest?base=USD`)
+    fetch(`https://api.exchangerate.host/latest?base=${baseCurrency}`)
       .then(res => res.json())
       .then(data => {
-        setCurrencies(Object.keys(data.rates));
-        setExchangeRate(data.rates[baseCurrency]);
-        setCurrentExchangeRate(data.rates[currencyType]);
+        setCurrencies(data.rates);
       });
-  }, [currencyType, baseCurrency]);
+  }, [baseCurrency]);
 
+  useEffect(() => {
+    const total = transaction.reduce((toplam, item) => {
+      return item.type === "Income"
+        ? toplam + parseFloat(item.amount)
+        : toplam - parseFloat(item.amount);
+    }, 0);
+    setTotalAmount(total);
+
+  }, [transaction]);
+
+  console.log("Total Amount", totalAmount);
+  console.log("Currencies", currencies);
+  console.log("transaction", transaction);
   console.log("currency type", currencyType);
   console.log("base currency", baseCurrency);
-  console.log("exchange rate", exchangeRate);
-  console.log("current exchange rate", currentExchangeRate);
+  
+  // console.log("current exchange rate", currentExchangeRate);
   console.log("amount", amount);
 
   return (
@@ -116,8 +121,7 @@ function App() {
 
         <div className="p-5  rounded-lg">
           <h2 className="text-lg font-semibold mb-4 ">
-            Total Amount: {(finalAmount * exchangeRate).toFixed(1)}{" "}
-            {baseCurrency}
+            Total Amount: {totalAmount.toFixed(1) } {baseCurrency}
           </h2>
           <div className="mb-4  flex flex-row">
             <label htmlFor="currency" className="m-2 rounded-md w ">
@@ -129,7 +133,7 @@ function App() {
               onChange={e => setBaseCurrency(e.target.value)}
               value={baseCurrency}
             >
-              {currencies.map(item => (
+              {Object.keys(currencies).map(item => (
                 <option key={item} value={item}>
                   {item}
                 </option>
@@ -164,6 +168,9 @@ function App() {
                   CURRENCY
                 </th>
                 <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  TYPE
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
                   DATE / TIME
                 </th>
                 <th className="px-4 py-2 text-center text-gray-700 font-bold">
@@ -188,6 +195,9 @@ function App() {
                     </td>
                     <td className="px-4 py-2  text-gray-700 text-center">
                       {item.currencyType}
+                    </td>
+                    <td className="px-4 py-2  text-gray-700 text-center">
+                      {item.type}
                     </td>
                     <td className="px-4 py-2  text-gray-700 text-center">
                       <div className="text-sm text-gray-500">{item.date}</div>
@@ -249,7 +259,7 @@ function App() {
                         onChange={e => setCurrencyType(e.target.value)}
                         className="w-full px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:border-gray-700"
                       >
-                        {currencies.map(currency => (
+                        {Object.keys(currencies).map(currency => (
                           <option key={currency} value={currency}>
                             {currency}
                           </option>
