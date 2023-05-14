@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   const [description, setDescription] = useState("");
@@ -11,68 +11,66 @@ function App() {
   const [exchangeRate, setExchangeRate] = useState(1);
   const [currentExchangeRate, setCurrentExchangeRate] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  const [editId, setEditId] = useState(null);
-  
 
-  //handleEdit fonksiyonuna item propu verildi. Bu item transaction mapinden gelen itemla ui tarafinda kullanilirken eslesecek. Transaction'daki degerler propumuzun ozellikleriyle ayarlandi
-  const handleEdit = item => {
-    setEditId(item.id);
-    setDescription(item.description);
-    setAmount(item.amount);
-    setCurrencyType(item.currencyType);
-    setShowModal(true);
-    
-  };
 
-  //handleIncome gelir ekleme fonksiyonudur. Kullanicinin edit butonuna basma ihtimalina karsn bir if else olusturdum.
-  //Eger editId varsa gecici yeni bir transaction degiskeni olusturdum transaction'i mapledim ve description, amount ve currencyType prop'larini guncelledim.
-  // Sonra setTransaction ile transaction state'ini guncelledim ve editId'yi null yaptim.
-  //Else islemini daha onceden transactionlari gostermek icin olusturmustum
-  const handleIncome = e => {
-    e.preventDefault();
-    if (editId) {
-      const tempTransaction = transaction.map(item => {
-        if (item.id === editId) {
-          return {
-            ...item,
-            description: description,
-            amount: amount,
-            currencyType: currencyType,
-          };
-        }
-        return item;
-      });
-      setTransaction(tempTransaction);
-      setEditId(null);
-    } else {
-      setAmount("");
-      setDescription("");
-      if (baseCurrency !== "usd") {
-        setFinalAmount(finalAmount + parseFloat(amount) / exchangeRate);
-      } else {
-        setFinalAmount(finalAmount + parseFloat(amount));
-      }
-      if (currencyType !== "usd") {
-        setFinalAmount(finalAmount + parseFloat(amount) / currentExchangeRate);
-      } else {
-        setFinalAmount(finalAmount + parseFloat(amount));
-      }
-      setTransaction([
-        ...transaction,
-        {
-          id: Date.now(),
-          description: description,
-          amount: amount,
-          currencyType: currencyType,
-          date: new Date().toLocaleDateString(),
-          time: new Date().toLocaleTimeString(),
-          color: "bg-green-200",
-        },
-      ]);
+const handleDelete = id => {
+    setTransaction(transaction.filter(item => item.id !== id));
+    const deletedItem = transaction.find(item => item.id === id);
+    if (deletedItem.color === "bg-green-300") {
+      setFinalAmount(finalAmount - parseFloat(deletedItem.amount));
+    }
+    if (deletedItem.color === "bg-red-300") {
+      setFinalAmount(finalAmount + parseFloat(deletedItem.amount));
     }
   };
 
+  
+
+  const handleIncome = e => {
+    e.preventDefault();
+    //inptlar bossa modal kapanmaz
+    if (!description || !amount) {
+      setShowModal(true);
+      return;
+    }
+    setAmount("");
+    setDescription("");
+    
+    if (baseCurrency !== "USD") {
+      setFinalAmount(finalAmount + parseFloat(amount) / exchangeRate);
+    } else {
+      setFinalAmount(finalAmount + parseFloat(amount));
+    }
+    if (currencyType !== "USD") {
+      setFinalAmount(finalAmount + parseFloat(amount) / currentExchangeRate);
+    } else {
+      setFinalAmount(finalAmount + parseFloat(amount));
+    }
+    console.log("final amount", finalAmount);
+    console.log("amount", amount);
+    console.log("exchange rate", exchangeRate);
+    console.log("current exchange rate", currentExchangeRate);
+
+    setTransaction([
+      ...transaction,
+      {
+        id: Date.now(),
+        description: description,
+        amount: amount,
+        currencyType: currencyType,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        color: "bg-green-300",
+      },
+    ]);
+  };
+
   const handleExpense = () => {
+    if (!description || !amount) {
+      setShowModal(true);
+      return;
+    }
+
     setAmount("");
     setDescription("");
     if (baseCurrency !== "usd") {
@@ -94,7 +92,7 @@ function App() {
         currencyType: currencyType,
         date: new Date().toLocaleDateString(),
         time: new Date().toLocaleTimeString(),
-        color: "bg-red-200",
+        color: "bg-red-300",
       },
     ]);
   };
@@ -104,8 +102,8 @@ function App() {
       .then(res => res.json())
       .then(data => {
         setCurrencies(Object.keys(data.rates));
-        setExchangeRate(data.rates[baseCurrency.toUpperCase()]);
-        setCurrentExchangeRate(data.rates[currencyType.toUpperCase()]);
+        setExchangeRate(data.rates[baseCurrency]);
+        setCurrentExchangeRate(data.rates[currencyType]);
       });
   }, [currencyType, baseCurrency]);
 
@@ -119,12 +117,16 @@ function App() {
     <div className="bg-gradient-to-r from-blue-300 to-indigo-500 min-h-screen">
       <h1 className="text-3xl font-bold text-center pt-12">FINANCE TRACKER</h1>
       <div className="container mx-auto mt-20">
-      <img src="public/logo.png" alt="Logo" className="w-32 absolute top-10 left-10" />
+        <img
+          src="public/logo.png"
+          alt="Logo"
+          className="w-32 absolute top-10 left-10"
+        />
 
         <div className="p-5  rounded-lg">
           <h2 className="text-lg font-semibold mb-4 ">
             Total Amount: {(finalAmount * exchangeRate).toFixed(1)}{" "}
-            {baseCurrency.toUpperCase()}
+            {baseCurrency}
           </h2>
           <div className="mb-4  flex flex-row">
             <label htmlFor="currency" className="m-2 rounded-md w ">
@@ -138,64 +140,65 @@ function App() {
             >
               {currencies.map(item => (
                 <option key={item} value={item}>
-                  {item.toUpperCase()}
+                  {item}
                 </option>
               ))}
             </select>
           </div>
           <h2 className="text-2xl font-bold mb-4">Transactions</h2>
 
-          <table className="w-full table-fixed text-center rounded-lg overflow-hidden">
-  <thead>
-    <tr className="bg-gray-200">
-      <th className="px-4 py-2 text-center text-gray-700 font-bold">
-        DESCRIPTION
-      </th>
-      <th className="px-4 py-2 text-center text-gray-700 font-bold">
-        AMOUNT
-      </th>
-      <th className="px-4 py-2 text-center text-gray-700 font-bold">
-        CURRENCY
-      </th>
-      <th className="px-4 py-2 text-center text-gray-700 font-bold">
-        DATE / TIME
-      </th>
-      <th className="px-4 py-2 text-center text-gray-700 font-bold">
-        ACTION
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    {transaction.map(item => (
-      <tr key={item.id} className={item.color}>
-        <td className="px-4 py-2  text-gray-700 text-center">
-          {item.description}
-        </td>
-        <td className="px-4 py-2  text-gray-700 text-center">
-          {item.amount}
-        </td>
-        <td className="px-4 py-2  text-gray-700 text-center">
-          {item.currencyType.toUpperCase()}
-        </td>
-        <td className="px-4 py-2  text-gray-700 text-center">
-          <div className="text-sm text-gray-500">{item.date}</div>
-          <div className="text-xs text-gray-500">{item.time}</div>
-        </td>
-        <td className="px-4 py-2 text-left">
-          <button
-            className="w-20 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
-            onClick={() => handleEdit(item)}
+          <table
+            id="transactionTable"
+            className="w-full table-fixed text-center rounded-lg overflow-hidden"
           >
-            Edit
-          </button>
-          <button className="w-20 bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1">
-            Delete
-          </button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  DESCRIPTION
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  AMOUNT
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  CURRENCY
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  DATE / TIME
+                </th>
+                <th className="px-4 py-2 text-center text-gray-700 font-bold">
+                  ACTION
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {transaction.map(item => (
+                <tr key={item.id} className={item.color}>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    {item.description}
+                  </td>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    {item.amount}
+                  </td>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    {item.currencyType}
+                  </td>
+                  <td className="px-4 py-2  text-gray-700 text-center">
+                    <div className="text-sm text-gray-500">{item.date}</div>
+                    <div className="text-xs text-gray-500">{item.time}</div>
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    <button
+                      className="flex-1  bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
+                      type="button"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <div className="flex justify-center pt-16">
             <button
               className="bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
@@ -241,7 +244,7 @@ function App() {
                       >
                         {currencies.map(currency => (
                           <option key={currency} value={currency}>
-                            {currency.toUpperCase()}
+                            {currency}
                           </option>
                         ))}
                       </select>
