@@ -11,20 +11,11 @@ function App() {
   const [exchangeRate, setExchangeRate] = useState(1);
   const [currentExchangeRate, setCurrentExchangeRate] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
+  // const handleDelete = id => {
 
-const handleDelete = id => {
-    setTransaction(transaction.filter(item => item.id !== id));
-    const deletedItem = transaction.find(item => item.id === id);
-    if (deletedItem.color === "bg-green-300") {
-      setFinalAmount(finalAmount - parseFloat(deletedItem.amount));
-    }
-    if (deletedItem.color === "bg-red-300") {
-      setFinalAmount(finalAmount + parseFloat(deletedItem.amount));
-    }
-  };
-
-  
+  // };
 
   const handleIncome = e => {
     e.preventDefault();
@@ -35,7 +26,7 @@ const handleDelete = id => {
     }
     setAmount("");
     setDescription("");
-    
+
     if (baseCurrency !== "USD") {
       setFinalAmount(finalAmount + parseFloat(amount) / exchangeRate);
     } else {
@@ -146,7 +137,17 @@ const handleDelete = id => {
             </select>
           </div>
           <h2 className="text-2xl font-bold mb-4">Transactions</h2>
-
+          <div className="flex justify-between items-center">
+            <div className="flex items-center ml-auto">
+              <input
+                type="text"
+                placeholder="Search by description..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="px-3 py-2 m-2 text-sm border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-300"
+              />
+            </div>
+          </div>
           <table
             id="transactionTable"
             className="w-full table-fixed text-center rounded-lg overflow-hidden"
@@ -171,32 +172,38 @@ const handleDelete = id => {
               </tr>
             </thead>
             <tbody>
-              {transaction.map(item => (
-                <tr key={item.id} className={item.color}>
-                  <td className="px-4 py-2  text-gray-700 text-center">
-                    {item.description}
-                  </td>
-                  <td className="px-4 py-2  text-gray-700 text-center">
-                    {item.amount}
-                  </td>
-                  <td className="px-4 py-2  text-gray-700 text-center">
-                    {item.currencyType}
-                  </td>
-                  <td className="px-4 py-2  text-gray-700 text-center">
-                    <div className="text-sm text-gray-500">{item.date}</div>
-                    <div className="text-xs text-gray-500">{item.time}</div>
-                  </td>
-                  <td className="px-4 py-2 text-center">
-                    <button
-                      className="flex-1  bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
-                      type="button"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {transaction
+                .filter(item =>
+                  item.description
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+                )
+                .map(item => (
+                  <tr key={item.id} className={item.color}>
+                    <td className="px-4 py-2  text-gray-700 text-center">
+                      {item.description}
+                    </td>
+                    <td className="px-4 py-2  text-gray-700 text-center">
+                      {item.amount}
+                    </td>
+                    <td className="px-4 py-2  text-gray-700 text-center">
+                      {item.currencyType}
+                    </td>
+                    <td className="px-4 py-2  text-gray-700 text-center">
+                      <div className="text-sm text-gray-500">{item.date}</div>
+                      <div className="text-xs text-gray-500">{item.time}</div>
+                    </td>
+                    <td className="px-4 py-2 text-center">
+                      <button
+                        className="flex-1  bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
+                        type="button"
+                        // onClick={() => handleDelete(item.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
           <div className="flex justify-center pt-16">
