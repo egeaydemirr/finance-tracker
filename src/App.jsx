@@ -10,6 +10,8 @@ function App() {
   const [currencies, setCurrencies] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpense, setTotalExpense] = useState(0);
 
   const handleIncome = () => {
     if (!description || !amount) {
@@ -37,7 +39,6 @@ function App() {
       setShowModal(true);
       return;
     }
-
     setAmount("");
     setDescription("");
     setTransaction([
@@ -52,6 +53,21 @@ function App() {
         type: "Expense",
       },
     ]);
+  };
+
+  const handleDelete = id => {
+    const newTransaction = transaction.filter(item => item.id !== id);
+    setTransaction(newTransaction);
+  };
+
+  const handleEdit = id => {
+    const newTransaction = transaction.filter(item => item.id !== id);
+    const selectedTransaction = transaction.find(item => item.id === id);
+    setDescription(selectedTransaction.description);
+    setAmount(selectedTransaction.amount);
+    setCurrencyType(selectedTransaction.currencyType);
+    setTransaction(newTransaction);
+    setShowModal(true);
   };
 
   useEffect(() => {
@@ -72,16 +88,23 @@ function App() {
     }, 0);
 
     setTotalAmount(total);
+    setTotalIncome(
+      transaction.reduce((toplam, item) => {
+        return item.type === "Income"
+          ? toplam + parseFloat(item.amount)
+          : toplam;
+      }, 0)
+    );
+    setTotalExpense(
+      transaction.reduce((toplam, item) => {
+        return item.type === "Expense"
+          ? toplam - parseFloat(item.amount)
+          : toplam;
+      }, 0)
+    );
   }, [transaction]);
 
   console.log("total amount", totalAmount);
-
-  // useEffect(() => {
-  //   const exchangeRate = currencies[baseCurrency];
-  //   // console.log("current exchange rate", exchangeRate);
-  //   const newTotalAmount = totalAmount * exchangeRate;
-  //   setTotalAmount(newTotalAmount);
-  // }, [baseCurrency]);
 
   useEffect(() => {
     let total = 0;
@@ -120,13 +143,20 @@ function App() {
         />
 
         <div className="p-5  rounded-lg">
-          <h2 className="text-lg font-semibold mb-4 ">
+          <div className="flex flex-row justify-between">
+          <h2 className=" text-lg font-semibold mb-4 ">
             Total Amount:{" "}
             {totalAmount.toLocaleString(undefined, {
               style: "currency",
               currency: baseCurrency,
             })}
           </h2>
+          <div className="flex flex-col rounded-lg p-2">
+  <h3 className=" font-medium">Total Income Amount: {totalIncome}</h3>
+  <h3 className="font-medium">Total Expense Amount: {totalExpense}</h3>
+</div>
+
+          </div>
           <div className="mb-4  flex flex-row">
             <label htmlFor="currency" className="m-2 rounded-md w ">
               Change Base Currency
@@ -212,11 +242,19 @@ function App() {
                       <div className="text-sm text-gray-500">{item.date}</div>
                       <div className="text-xs text-gray-500">{item.time}</div>
                     </td>
-                    <td className="px-4 py-2 text-center">
+                    <td className="flex flex-row px-4 py-2 text-center">
                       <button
-                        className="flex-1  bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
+                        className="flex-1 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-green-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
                         type="button"
-                        // onClick={() => handleDelete(item.id)}
+                        onClick={() => handleEdit(item.id)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="flex-1 bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-2 mx-2 rounded-md shadow-lg duration-300 hover:-translate-y-1"
+                        type="button"
+                        onClick={() => handleDelete(item.id)}
                       >
                         Delete
                       </button>
