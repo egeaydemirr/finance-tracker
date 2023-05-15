@@ -120,7 +120,7 @@ function App() {
 
   return (
     <div className="bg-gradient-to-r from-blue-300 to-indigo-500 min-h-screen">
-      <h1 className="text-3xl font-bold text-center pt-12">FINANCE TRACKER</h1>
+      <h1 className="text-3xl font-bold text-center pt-4">FINANCE TRACKER</h1>
       <div className="container mx-auto mt-20">
         <img
           src="public/logo.png"
