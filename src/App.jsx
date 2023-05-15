@@ -10,8 +10,7 @@ function App() {
   const [currencies, setCurrencies] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [totalIncome, setTotalIncome] = useState(0);
-  const [totalExpense, setTotalExpense] = useState(0);
+
 
   const handleIncome = () => {
     if (!description || !amount) {
@@ -86,20 +85,7 @@ function App() {
     }, 0);
 
     setTotalAmount(total);
-    setTotalIncome(
-      transaction.reduce((toplam, item) => {
-        return item.type === "Income"
-          ? toplam + parseFloat(item.amount)
-          : toplam;
-      }, 0)
-    );
-    setTotalExpense(
-      transaction.reduce((toplam, item) => {
-        return item.type === "Expense"
-          ? toplam - parseFloat(item.amount)
-          : toplam;
-      }, 0)
-    );
+
   }, [transaction]);
 
   useEffect(() => {
@@ -137,14 +123,6 @@ function App() {
                 currency: baseCurrency,
               })}
             </h2>
-            <div className="flex flex-col rounded-lg p-2">
-              <h3 className=" font-medium">
-                Total Income Amount: {totalIncome}
-              </h3>
-              <h3 className="font-medium">
-                Total Expense Amount: {totalExpense}
-              </h3>
-            </div>
           </div>
           <div className="mb-4  flex flex-row">
             <label htmlFor="currency" className="m-2 rounded-md w ">
