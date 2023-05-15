@@ -104,8 +104,6 @@ function App() {
     );
   }, [transaction]);
 
-  console.log("total amount", totalAmount);
-
   useEffect(() => {
     let total = 0;
     for (const item of transaction) {
@@ -122,16 +120,6 @@ function App() {
     setTotalAmount(total);
   }, [transaction, currencies]);
 
-  console.log("RATE !!!!:", currencies[baseCurrency]);
-  console.log("RATEATETAESTSETASESDTS", currencies[currencyType]);
-
-  console.log("currency type", currencyType);
-  console.log("base currency", baseCurrency);
-  console.log("transaction", transaction);
-
-  // console.log("current exchange rate", currentExchangeRate);
-  console.log("amount", amount);
-
   return (
     <div className="bg-gradient-to-r from-blue-300 to-indigo-500 min-h-screen">
       <h1 className="text-3xl font-bold text-center pt-12">FINANCE TRACKER</h1>
@@ -144,18 +132,21 @@ function App() {
 
         <div className="p-5  rounded-lg">
           <div className="flex flex-row justify-between">
-          <h2 className=" text-lg font-semibold mb-4 ">
-            Total Amount:{" "}
-            {totalAmount.toLocaleString(undefined, {
-              style: "currency",
-              currency: baseCurrency,
-            })}
-          </h2>
-          <div className="flex flex-col rounded-lg p-2">
-  <h3 className=" font-medium">Total Income Amount: {totalIncome}</h3>
-  <h3 className="font-medium">Total Expense Amount: {totalExpense}</h3>
-</div>
-
+            <h2 className=" text-lg font-semibold mb-4 ">
+              Total Amount:{" "}
+              {totalAmount.toLocaleString(undefined, {
+                style: "currency",
+                currency: baseCurrency,
+              })}
+            </h2>
+            <div className="flex flex-col rounded-lg p-2">
+              <h3 className=" font-medium">
+                Total Income Amount: {totalIncome}
+              </h3>
+              <h3 className="font-medium">
+                Total Expense Amount: {totalExpense}
+              </h3>
+            </div>
           </div>
           <div className="mb-4  flex flex-row">
             <label htmlFor="currency" className="m-2 rounded-md w ">
