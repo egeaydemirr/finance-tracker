@@ -74,29 +74,33 @@ function App() {
     setTotalAmount(total);
   }, [transaction]);
 
-  useEffect(() => {
-    const currentExchangeRate = currencies[baseCurrency];
-    const newTransaction = transaction.map(item => {
-      return {
-        ...item,
-        amount: (item.amount * currentExchangeRate).toFixed(2),
-        currencyType: baseCurrency,
-      };
-    });
-    setTransaction(newTransaction);
-  }, [baseCurrency]);
+  console.log("total amount", totalAmount);
+
+  // useEffect(() => {
+  //   const exchangeRate = currencies[baseCurrency];
+  //   // console.log("current exchange rate", exchangeRate);
+  //   const newTotalAmount = totalAmount * exchangeRate;
+  //   setTotalAmount(newTotalAmount);
+  // }, [baseCurrency]);
 
   useEffect(() => {
-    const exchangeRate = currencies[currencyType];
-    const newTransaction = transaction.map(item => {
-      return {
-        ...item,
-        amount: (item.amount / exchangeRate).toFixed(2),
-        currencyType: currencyType,
-      };
-    });
-    setTransaction(newTransaction);
-  }, [currencyType]);
+    let total = 0;
+    for (const item of transaction) {
+      const { amount, currencyType, type } = item;
+      const rate = 1 / currencies[currencyType];
+      const amountInBaseCurrency = amount * rate;
+
+      if (type === "Income") {
+        total += amountInBaseCurrency;
+      } else {
+        total -= amountInBaseCurrency;
+      }
+    }
+    setTotalAmount(total);
+  }, [transaction, currencies]);
+
+  console.log("RATE !!!!:", currencies[baseCurrency]);
+  console.log("RATEATETAESTSETASESDTS", currencies[currencyType]);
 
   console.log("currency type", currencyType);
   console.log("base currency", baseCurrency);
