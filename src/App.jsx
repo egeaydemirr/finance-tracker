@@ -75,8 +75,6 @@ function App() {
       .then(res => res.json())
       .then(data => {
         setCurrencies(data.rates);
-        // console.log("rate", data.rates[baseCurrency]);
-        // console.log("ikicin rate:", currencies[baseCurrency]);
       });
   }, [baseCurrency]);
 
@@ -127,7 +125,7 @@ function App() {
         <img
           src="public/logo.png"
           alt="Logo"
-          className="w-32 absolute top-10 left-10"
+          className="w-36 absolute top-10 left-10"
         />
 
         <div className="p-5  rounded-lg">
