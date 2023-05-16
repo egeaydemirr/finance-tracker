@@ -4,12 +4,22 @@ function App() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState();
   const [totalAmount, setTotalAmount] = useState(0);
-  const [transaction, setTransaction] = useState([]);
+  
   const [baseCurrency, setBaseCurrency] = useState("USD");
   const [currencyType, setCurrencyType] = useState("USD");
   const [currencies, setCurrencies] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [transaction, setTransaction] = useState(() => {
+    const data = localStorage.getItem("transaction");
+    return data ? JSON.parse(data) : [];
+  });
+  
+
+  useEffect(() => {
+    localStorage.setItem("transaction", JSON.stringify(transaction));
+  }, [transaction]);
+  
 
 
   const handleIncome = () => {
