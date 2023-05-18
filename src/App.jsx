@@ -119,7 +119,7 @@ function App() {
       <h1 className="text-3xl font-bold text-center pt-4">FINANCE TRACKER</h1>
       <div className="container mx-auto mt-20">
         <img
-          src="assets/logo.png"
+          src="logo.png"
           alt="Logo"
           className="w-36 absolute top-10 left-10"
         />
