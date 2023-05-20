@@ -11,7 +11,7 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [editTransactionType, setEditTransactionType] = useState("Income");
+  const [transactionType, setTransactionType] = useState("Income");
   const [transaction, setTransaction] = useState(() => {
     const data = localStorage.getItem("transaction");
     return data ? JSON.parse(data) : [];
@@ -69,35 +69,35 @@ function App() {
   };
 
   const handleEdit = id => {
-  
     const newTransaction = transaction.find(item => item.id === id);
     setSelectedTransaction(newTransaction);
     setShowEditModal(true);
     setDescription(newTransaction.description);
     setAmount(newTransaction.amount);
     setCurrencyType(newTransaction.currencyType);
-    setEditTransactionType(newTransaction.type);
-    
-
+    setTransactionType(newTransaction.type);
   };
   const saveChanges = () => {
     const updatedTransaction = transaction.map(item => {
       if (item.id === selectedTransaction.id) {
         return {
-
           ...item,
           description,
           amount,
           currencyType,
-          type: editTransactionType,
-          
+          type: transactionType,
         };
       }
-      console.log("sdhfjsdgfhjgsdhjfghjsdgfhjgshjdfghjs",item.type)
-      
+      console.log("sdhfjsdgfhjgsdhjfghjsdgfhjgshjdfghjs", item.type);
+
       return item;
     });
     setTransaction(updatedTransaction);
+    setAmount("");
+    setDescription("");
+    setCurrencyType("USD");
+    setTransactionType("Income");
+    setSelectedTransaction(null);
     setShowEditModal(false);
   };
 
@@ -177,18 +177,27 @@ function App() {
                 </select>
               </div>
               {/*footer*/}
-              <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b space-x-2">
-                <button
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
-                  onClick={handleIncome}
+              <div className="flex justify-between p-6 border-t border-solid border-slate-200 rounded-b space-x-2">
+                <select
+                  value={transactionType}
+                  onChange={e => setTransactionType(e.target.value)}
+                  className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 "
                 >
-                  Income
-                </button>
+                  <option value="Income">Income</option>
+                  <option value="Expense">Expense</option>
+                </select>
+
                 <button
-                  className="flex-1 bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
-                  onClick={handleExpense}
+                  className="flex-shrink-0 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+                  onClick={() => {
+                    if (transactionType === "Income") {
+                      handleIncome();
+                    } else if (transactionType === "Expense") {
+                      handleExpense();
+                    }
+                  }}
                 >
-                  Expense
+                  Add Transaction
                 </button>
 
                 <button
@@ -208,7 +217,6 @@ function App() {
   }
 
   function EditModal() {
-    console.log("edit modal rendered");
     return (
       <>
         <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
@@ -251,19 +259,24 @@ function App() {
               </div>
               {/*footer*/}
               <div className="flex justify-between p-6 border-t border-solid border-slate-200 rounded-b space-x-2">
-                <select value={editTransactionType} onChange={(e)=>setEditTransactionType(e.target.value)}>
+                <select
+                  value={transactionType}
+                  onChange={e => setTransactionType(e.target.value)}
+                  className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 "
+                >
                   <option value="Income">Income</option>
                   <option value="Expense">Expense</option>
                 </select>
 
                 <button
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+                  className="flex-2 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
                   onClick={saveChanges}
                 >
                   Save Changes
                 </button>
+
                 <button
-                  className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                  className="text-red-500 font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                   type="button"
                   onClick={() => setShowEditModal(false)}
                 >
@@ -280,14 +293,10 @@ function App() {
 
   return (
     <div className="bg-gradient-to-r from-blue-300 to-indigo-500 min-h-screen">
-      <h1 className="text-3xl font-bold text-center pt-4">FINANCE TRACKER</h1>
-      <div className="container mx-auto mt-20">
-        <img
-          src="logo.png"
-          alt="Logo"
-          className="w-36 absolute top-10 left-10"
-        />
-
+      <div className="container mx-auto px-4 sm:px-8">
+        <div className="flex flex-row justify-center">
+          <img src="logo.png" alt="Logo" className="w-64 pt-2" />
+        </div>
         <div className="p-5  rounded-lg">
           <div className="flex flex-row justify-between">
             <h2 className=" text-lg font-semibold mb-4 ">
@@ -315,8 +324,9 @@ function App() {
               ))}
             </select>
           </div>
-          <h2 className="text-2xl font-bold mb-4">Transactions</h2>
+
           <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold ">Transactions</h2>
             <div className="flex items-center ml-auto">
               <input
                 type="text"
