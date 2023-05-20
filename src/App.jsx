@@ -4,23 +4,22 @@ function App() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState();
   const [totalAmount, setTotalAmount] = useState(0);
-  
   const [baseCurrency, setBaseCurrency] = useState("USD");
   const [currencyType, setCurrencyType] = useState("USD");
   const [currencies, setCurrencies] = useState([]);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editTransactionType, setEditTransactionType] = useState("Income");
   const [transaction, setTransaction] = useState(() => {
     const data = localStorage.getItem("transaction");
     return data ? JSON.parse(data) : [];
   });
-  
 
   useEffect(() => {
     localStorage.setItem("transaction", JSON.stringify(transaction));
   }, [transaction]);
-  
-
 
   const handleIncome = () => {
     if (!description || !amount) {
@@ -70,13 +69,36 @@ function App() {
   };
 
   const handleEdit = id => {
-    const newTransaction = transaction.filter(item => item.id !== id);
-    const selectedTransaction = transaction.find(item => item.id === id);
-    setDescription(selectedTransaction.description);
-    setAmount(selectedTransaction.amount);
-    setCurrencyType(selectedTransaction.currencyType);
-    setTransaction(newTransaction);
-    setShowModal(true);
+  
+    const newTransaction = transaction.find(item => item.id === id);
+    setSelectedTransaction(newTransaction);
+    setShowEditModal(true);
+    setDescription(newTransaction.description);
+    setAmount(newTransaction.amount);
+    setCurrencyType(newTransaction.currencyType);
+    setEditTransactionType(newTransaction.type);
+    
+
+  };
+  const saveChanges = () => {
+    const updatedTransaction = transaction.map(item => {
+      if (item.id === selectedTransaction.id) {
+        return {
+
+          ...item,
+          description,
+          amount,
+          currencyType,
+          type: editTransactionType,
+          
+        };
+      }
+      console.log("sdhfjsdgfhjgsdhjfghjsdgfhjgshjdfghjs",item.type)
+      
+      return item;
+    });
+    setTransaction(updatedTransaction);
+    setShowEditModal(false);
   };
 
   useEffect(() => {
@@ -95,7 +117,6 @@ function App() {
     }, 0);
 
     setTotalAmount(total);
-
   }, [transaction]);
 
   useEffect(() => {
@@ -113,6 +134,149 @@ function App() {
     }
     setTotalAmount(total);
   }, [transaction, currencies]);
+
+  function TransactionModal() {
+    return (
+      <>
+        <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+          <div className="relative w-auto my-6 mx-auto max-w-3xl">
+            {/*content*/}
+            <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+              {/*body*/}
+              <div className="relative p-6 flex-auto">
+                <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 leading-tight">
+                  Add Your Transaction
+                </h1>
+
+                <input
+                  type="text"
+                  placeholder="Description"
+                  className="border border-gray-400 focus:border-blue-500 focus:outline-none p-4 mb-4 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105"
+                  onChange={e => setDescription(e.target.value)}
+                  value={description}
+                />
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  className="border border-gray-400 focus:border-blue-500 focus:outline-none p-4 mb-4 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105"
+                  onChange={e => setAmount(e.target.value)}
+                  value={amount}
+                />
+
+                <select
+                  id="currency"
+                  value={currencyType}
+                  onChange={e => setCurrencyType(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:border-gray-700"
+                >
+                  {Object.keys(currencies).map(currency => (
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/*footer*/}
+              <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b space-x-2">
+                <button
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+                  onClick={handleIncome}
+                >
+                  Income
+                </button>
+                <button
+                  className="flex-1 bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+                  onClick={handleExpense}
+                >
+                  Expense
+                </button>
+
+                <button
+                  className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+      </>
+    );
+  }
+
+  function EditModal() {
+    console.log("edit modal rendered");
+    return (
+      <>
+        <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+          <div className="relative w-auto my-6 mx-auto max-w-3xl">
+            {/*content*/}
+            <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+              {/*body*/}
+              <div className="relative p-6 flex-auto">
+                <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 leading-tight">
+                  Edit Your Transaction
+                </h1>
+
+                <input
+                  type="text"
+                  placeholder="Description"
+                  className="border border-gray-400 focus:border-blue-500 focus:outline-none p-4 mb-4 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105"
+                  onChange={e => setDescription(e.target.value)}
+                  value={description}
+                />
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  className="border border-gray-400 focus:border-blue-500 focus:outline-none p-4 mb-4 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105"
+                  onChange={e => setAmount(e.target.value)}
+                  value={amount}
+                />
+
+                <select
+                  id="currency"
+                  value={currencyType}
+                  onChange={e => setCurrencyType(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:border-gray-700"
+                >
+                  {Object.keys(currencies).map(currency => (
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/*footer*/}
+              <div className="flex justify-between p-6 border-t border-solid border-slate-200 rounded-b space-x-2">
+                <select value={editTransactionType} onChange={(e)=>setEditTransactionType(e.target.value)}>
+                  <option value="Income">Income</option>
+                  <option value="Expense">Expense</option>
+                </select>
+
+                <button
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+                  onClick={saveChanges}
+                >
+                  Save Changes
+                </button>
+                <button
+                  className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+      </>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-r from-blue-300 to-indigo-500 min-h-screen">
@@ -250,75 +414,9 @@ function App() {
             </button>
           </div>
           {/* MODAL */}
-          {showModal ? (
-            <>
-              <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-                <div className="relative w-auto my-6 mx-auto max-w-3xl">
-                  {/*content*/}
-                  <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                    {/*body*/}
-                    <div className="relative p-6 flex-auto">
-                      <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 leading-tight">
-                        Add Your Transaction
-                      </h1>
-
-                      <input
-                        type="text"
-                        placeholder="Description"
-                        className="border border-gray-400 focus:border-blue-500 focus:outline-none p-4 mb-4 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105"
-                        onChange={e => setDescription(e.target.value)}
-                        value={description}
-                      />
-                      <input
-                        type="number"
-                        placeholder="Amount"
-                        className="border border-gray-400 focus:border-blue-500 focus:outline-none p-4 mb-4 rounded-lg w-full transition duration-300 ease-in-out transform hover:scale-105"
-                        onChange={e => setAmount(e.target.value)}
-                        value={amount}
-                      />
-
-                      <select
-                        id="currency"
-                        value={currencyType}
-                        onChange={e => setCurrencyType(e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:border-gray-700"
-                      >
-                        {Object.keys(currencies).map(currency => (
-                          <option key={currency} value={currency}>
-                            {currency}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {/*footer*/}
-                    <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b space-x-2">
-                      <button
-                        className="flex-1 bg-gradient-to-r from-green-500 to-green-900 hover:from-green-700 hover:to-teal-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
-                        onClick={handleIncome}
-                      >
-                        Income
-                      </button>
-                      <button
-                        className="flex-1 bg-gradient-to-r from-red-500 to-red-900 hover:from-red-700 hover:to-rose-500 text-white p-3 rounded-md shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
-                        onClick={handleExpense}
-                      >
-                        Expense
-                      </button>
-
-                      <button
-                        className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                        type="button"
-                        onClick={() => setShowModal(false)}
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
-            </>
-          ) : null}
+          {showModal ? TransactionModal() : null}
+          {/* EDIT MODAL */}
+          {showEditModal ? EditModal() : null}
         </div>
       </div>
     </div>
