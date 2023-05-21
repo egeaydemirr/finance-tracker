@@ -113,8 +113,9 @@ function App() {
       .then(res => res.json())
       .then(data => {
         setCurrencies(data.rates);
-        setLoading(true);
       });
+    setLoading(true);
+    console.log(loading);
   }, [baseCurrency]);
 
   useEffect(() => {
@@ -141,6 +142,7 @@ function App() {
     }
     setTotalAmount(total);
     setLoading(false);
+    console.log(loading);
   }, [transaction, currencies]);
 
   function TransactionModal() {
